@@ -12,6 +12,8 @@ namespace PizzaStore_MinimalAPI_
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            string? connectionString = builder.Configuration.GetConnectionString("Pizzas") ?? "Data Source=Pizzas.db";
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -23,7 +25,9 @@ namespace PizzaStore_MinimalAPI_
                 });
             });
 
-            builder.Services.AddDbContext<PizzaDb>(option => option.UseInMemoryDatabase("items"));
+            //builder.Services.AddDbContext<PizzaDb>(option => option.UseInMemoryDatabase("items"));
+
+            builder.Services.AddSqlite<PizzaDb>(connectionString);
 
             var app = builder.Build();
 
@@ -46,7 +50,7 @@ namespace PizzaStore_MinimalAPI_
 
             app.MapPut("/pizza/{id}", async (PizzaDb db, Pizza updatepizza, int id) =>
             {
-                Pizza pizza = await db.Pizzas.FindAsync(id);
+                Pizza? pizza = await db.Pizzas.FindAsync(id);
                 if (pizza is null)
                     return Results.NotFound();
 
